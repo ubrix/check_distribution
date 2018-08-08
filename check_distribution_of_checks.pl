@@ -19,7 +19,6 @@ sub testStats($);
 sub optimalDistribution($$);
 sub testDistMean($);
 sub testSuit1();
-#sub test1($);
 
 my $usage ='
 Usage:
@@ -130,23 +129,21 @@ foreach my $interval (sort { $a <=> $b } keys %interval_value_count_hash) {
         my ($opti_variance, $opti_stddev) = testStats($optimal->query);
         my ($opti_mean, $opti_dist_max) = testDistMean($optimal->query);
         $return_string_long .= " (OPTIMAL variance: $opti_variance stddev: $opti_stddev dist_max: $opti_dist_max)\n";
-	my $int_exit_text = "int$interval:OK";
-	my $int_exit_code = 0;
-        #if (($opti_variance + $warning*100 < $variance || $opti_mean + $warning < $mean) and $exit_code < 1) {
+    my $int_exit_text = "int$interval:OK";
+    my $int_exit_code = 0;
         if (($opti_mean + $warning < $mean || $opti_dist_max + $warning < $dist_max)) {
             $int_exit_code = 1;
             $int_exit_text = "int$interval:WARNING";
         }
-        #if (($opti_variance + $critical*100 < $variance || $opti_mean + $critical < $mean) and $exit_code < 2) {
         if (($opti_mean + $critical < $mean || $opti_dist_max + $critical < $dist_max)) {
             $int_exit_code = 2;
             $int_exit_text = "int$interval:CRITICAL";
         }
-	if ($exit_code < $int_exit_code) {
-	    $exit_code = $int_exit_code;
-	}
-	
-	$return_string .= "$int_exit_text" . " $interval_string";
+    if ($exit_code < $int_exit_code) {
+        $exit_code = $int_exit_code;
+    }
+    
+    $return_string .= "$int_exit_text" . " $interval_string";
     }
 }
 
@@ -160,7 +157,6 @@ sub optimalDistribution($$) {
     my($interval, $count) = @_;
     my $vector=vector();
     my $mod = $interval / $count;
-    #my @copy_of_contents;
     print "optimal \n" if $opt_d;
     if ($mod < 1) {
         $mod = 1;
@@ -175,7 +171,6 @@ sub optimalDistribution($$) {
         }
         print "$n $step \n" if $opt_d;
         $vector->append($step);
-        #@copy_of_contents = $vector->query;
     }
     my $size = $vector->query_size();
     print "size: $size \n" if $opt_d;
@@ -187,126 +182,20 @@ sub testDistMean($) {
     my $vector=vector();
     my $stat = Statistics::Descriptive::Full->new();
     $stat->add_data(@_);
-    
-    #my $min = min( @{ $_[0]} );
-    #my $max = max( @{ $_[0]} );
-    #my $interval = $max - $min + 1;
 
     my $f = $stat->frequency_distribution_ref(100);
     for (sort {$a <=> $b} keys %$f) {
        print "key = $_, count = $f->{$_}\n" if $opt_d;
        $vector->append(int($f->{$_}));
     }
-    #print "    dist Stats: ";
-    #my ($variance, $stddev) = testStats($vector);
     print "mean: " . mean($vector) . "\n" if $opt_d;
-	return (mean($vector), max($vector->query));
+    return (mean($vector), max($vector->query));
 }
 
 sub testStats($) {
     # http://search.cpan.org/~jettero/Statistics-Basic-1.6611/lib/Statistics/Basic.pod
-    
     my $vector = vector(@_);
-    
     my $var  = variance($vector);
     my $stddev =  stddev($vector);
-    #print "vector $vector \n";
-    #print "Variance $var std dev $stddev \n";
-    # print " . "\n";
     return ($var, $stddev);
-}
-
-sub testSuit1() {
-    
-    my @test = (1,1,1,1,1,1);
-    test1(@test);
-    @test = (1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2);
-    test1(@test);
-    @test = (1..5, 50, 100);
-    test1(@test);
-    @test = (50, 100);
-    test1(@test);
-    @test = (1..50, 1..50);
-    test1(@test);
-    @test = (1..10, 1..10, 1..100);
-    test1(@test);
-    @test = (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 100..1000);
-    test1(@test);
-    
-#    ($variance, $stddev) = testDist(\@test);
-#    print "var: $variance stddev: $stddev; \n";
-#    ($variance, $stddev) = testStats(\@test);
-#    print "var: $variance stddev: $stddev; \n";
-#    
-#    print "*** Test \n";
-#    @test = (1,1,1,2,2,2);
-#    ($variance, $stddev) = testDist(\@test);
-#    print "var: $variance stddev: $stddev; \n";
-#    ($variance, $stddev) = testStats(\@test);
-#    print "var: $variance stddev: $stddev; \n";
-#    
-#    print "*** Test \n";
-#    @test = (1..5);
-#    ($variance, $stddev) = testDist(\@test);
-#    print "var: $variance stddev: $stddev; \n";
-#    ($variance, $stddev) = testStats(\@test);
-#    print "var: $variance stddev: $stddev; \n";
-#    
-#    print "*** Test \n";
-#    @test = (1..50);
-#    ($variance, $stddev) = testDist(\@test);
-#    print "var: $variance stddev: $stddev; \n";
-#    ($variance, $stddev) = testStats(\@test);
-#    print "var: $variance stddev: $stddev; \n";
-#    
-#    print "*** Test \n";
-#    @test = (1..500);
-#    ($variance, $stddev) = testDist(\@test);
-#    print "var: $variance stddev: $stddev; \n";
-#    ($variance, $stddev) = testStats(\@test);
-#    print "var: $variance stddev: $stddev; \n";
-#    
-#    print "*** Test \n";
-#    @test = (1,500);
-#    ($variance, $stddev) = testDist(\@test);
-#    print "var: $variance stddev: $stddev; \n";
-#    ($variance, $stddev) = testStats(\@test);
-#    print "var: $variance stddev: $stddev; \n";
-#    
-#    @test = (1,1);
-#    my $covariance = covariance( \@test, \@test );
-#    print "cov: $covariance \n";
-#    
-#    @test = (1..10);
-#    $covariance = covariance( \@test, \@test );
-#    print "cov: $covariance \n";
-    
-}
-
-sub test1 {
-    print "*** Test \n";
-    #my @test = shift;
-    my (@test) = @_;
-    #print "passed: @test; \n";
-    my ($variance, $stddev, $mean) = 0;
-    my $min = min @test;
-    my $max = max @test;
-    my $interval = ($max - $min + 1);
-    my $size = 0+@test;
-    
-    print "min: $min max: $max size: $size interval: $interval \n";
-    
-    
-    print join(", ", @test) . "\n";
-    $mean = testDistMean(\@test);
-    ($variance, $stddev) = testStats(\@test);
-    print "var: $variance stddev: $stddev mean: $mean; \n";
-
-   
-    my $optimal = optimalDistribution($interval, $size);
-    $mean = testDistMean($optimal->query);
-    ($variance, $stddev) = testStats($optimal->query);
-    print "OPT var: $variance stddev: $stddev mean: $mean; \n";
-    print join(", ", $optimal->query) . "\n" if $opt_d;
-    print "\n";
 }
