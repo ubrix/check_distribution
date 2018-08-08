@@ -122,7 +122,7 @@ foreach my $interval (sort { $a <=> $b } keys %interval_value_count_hash) {
         my $diff = $max - $min;
         my ($variance, $stddev) = testStats($vector->query);
         my ($mean, $dist_max) = testDistMean($vector->query);
-        $return_string .= "int: $interval mean/max: $mean/$dist_max; ";
+        my $interval_string .= "mean/max: $mean/$dist_max; ";
         $return_string_long .= "interval: $interval count: $count min: $min max: $max diff: $diff variance: $variance stddev: $stddev dist_max: $dist_max";
         $perfdata .= "variance$interval=$variance stddev$interval=$stddev mean$interval=$mean dist_max$interval=$dist_max ";
 
@@ -130,16 +130,23 @@ foreach my $interval (sort { $a <=> $b } keys %interval_value_count_hash) {
         my ($opti_variance, $opti_stddev) = testStats($optimal->query);
         my ($opti_mean, $opti_dist_max) = testDistMean($optimal->query);
         $return_string_long .= " (OPTIMAL variance: $opti_variance stddev: $opti_stddev dist_max: $opti_dist_max)\n";
+	my $int_exit_text = "int$interval:OK";
+	my $int_exit_code = 0;
         #if (($opti_variance + $warning*100 < $variance || $opti_mean + $warning < $mean) and $exit_code < 1) {
-        if (($opti_mean + $warning < $mean || $dist_max - $warning < $mean) and $exit_code < 1) {
-            $exit_code = 1;
-            $return_string = "WARNING $return_string";
+        if (($opti_mean + $warning < $mean || $opti_dist_max + $warning < $dist_max)) {
+            $int_exit_code = 1;
+            $int_exit_text = "int$interval:WARNING";
         }
         #if (($opti_variance + $critical*100 < $variance || $opti_mean + $critical < $mean) and $exit_code < 2) {
-        if (($opti_mean + $critical < $mean || $dist_max - $critical < $mean) and $exit_code < 2) {
-            $exit_code = 2;
-            $return_string = "CRITICAL $return_string";
+        if (($opti_mean + $critical < $mean || $opti_dist_max + $critical < $dist_max)) {
+            $int_exit_code = 2;
+            $int_exit_text = "int$interval:CRITICAL";
         }
+	if ($exit_code < $int_exit_code) {
+	    $exit_code = $int_exit_code;
+	}
+	
+	$return_string .= "$int_exit_text" . " $interval_string";
     }
 }
 

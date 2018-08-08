@@ -65,6 +65,7 @@ close (FILE1);
 unlink $file1;
 
 #hash rows
+# TODO: make sub
 foreach my $line (sort { $a <=> $b } keys %file_1_hash) {
     
     my @row = split(/;/,$file_1_hash{$line});
@@ -80,6 +81,7 @@ foreach my $line (sort { $a <=> $b } keys %file_1_hash) {
 undef %file_1_hash;
 
 # Process per interval
+# TODO: make sub
 foreach my $interval (sort { $a <=> $b } keys %interval_value_count_hash) {
     my $min = -1;
     my $max = -1;
